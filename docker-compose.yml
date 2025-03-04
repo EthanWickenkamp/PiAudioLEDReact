@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  audio-processor:
+    build: .
+    container_name: bluetooth_audio
+    privileged: true  # Allows access to Bluetooth and sound
+    network_mode: "host"  # Required for Bluetooth audio
+    volumes:
+      - /dev/snd:/dev/snd  # Allows ALSA access
+      - /run/dbus:/run/dbus  # Required for Bluetooth
+    environment:
+      - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
