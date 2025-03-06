@@ -29,10 +29,14 @@ sudo reboot
 git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git
 cd YOUR-REPO
 ```
+to pull newer version later in project directory root
+```bash
+git pull origin main
+```
 
 6. start docker compose build and run in detached -d
 ```bash
-docker-compose up --build -d
+docker compose up --build -d
 ```
 7. check container is running and check logs
 ```bash
