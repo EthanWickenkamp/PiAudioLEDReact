@@ -14,7 +14,6 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Copy config files
-COPY config/bluealsa.conf /etc/bluealsa.conf
 COPY config/alsa.conf /etc/asound.conf
 
 # Copy scripts
