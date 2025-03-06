@@ -18,7 +18,7 @@ COPY config/bluealsa.conf /etc/bluealsa.conf
 COPY config/alsa.conf /etc/asound.conf
 
 # Copy scripts
-COPY src /app
+COPY src /app/src
 WORKDIR /app
 
 # Make scripts executable
