@@ -4,11 +4,13 @@ FROM balenalib/raspberrypi3-debian:latest
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     bluealsa \
+    bluez-alsa-utils \
     alsa-utils \
     pulseaudio \
     pulseaudio-utils \
     bluetooth \
     bluez \
+    dbus \
     python3 \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*

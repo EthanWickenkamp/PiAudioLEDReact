@@ -1,18 +1,25 @@
 #!/bin/bash
 
-echo "Starting Bluetooth services..."
+# Start DBus
+/etc/init.d/dbus start
+
+# Start Bluetooth service
 service bluetooth start
-hciconfig hci0 up
-bluetoothctl <<EOF
-power on
-agent on
-discoverable on
-pairable on
-EOF
 
-echo "Forcing audio output to 3.5mm jack..."
-amixer cset numid=3 1  # Forces audio to analog jack
+# Make device discoverable and pairable
+bluetoothctl power on
+bluetoothctl agent on
+bluetoothctl discoverable on
+bluetoothctl pairable on
 
-echo "Starting Bluetooth audio sink..."
+# Start BlueALSA (If using BlueALSA)
 bluealsa &
-aplay -D plughw:0,0 /dev/null
+
+# Ensure ALSA is using the correct device
+amixer cset numid=3 1
+
+# Start Pulseaudio (if used)
+pulseaudio --start --verbose
+
+echo "Bluetooth audio receiver ready..."
+tail -f /dev/null  # Keep the container running

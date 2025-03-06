@@ -9,6 +9,13 @@
 ```bash
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
+docker --version
+```
+Install docker compose 
+```bash
+sudo apt-get update
+sudo apt-get install -y docker-compose-plugin
+docker compose version
 ```
 
 4. add user to docker group no more sudo for docker cmd
