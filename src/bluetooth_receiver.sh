@@ -1,25 +1,41 @@
 #!/bin/bash
 
-# Start DBus
-/etc/init.d/dbus start
+echo "Starting Bluetooth & PulseAudio setup..."
 
-# Start Bluetooth service
+# Start DBus and Bluetooth
+service dbus start
 service bluetooth start
 
-# Make device discoverable and pairable
+# Wait for Bluetooth adapter to be available
+echo "Waiting for Bluetooth adapter..."
+until bluetoothctl show | grep "Controller"; do
+    sleep 2
+done
+
+echo "Bluetooth adapter found!"
+
+# Set up Bluetooth
 bluetoothctl power on
 bluetoothctl agent on
 bluetoothctl discoverable on
 bluetoothctl pairable on
+bluetoothctl default-agent
 
-# Start BlueALSA (If using BlueALSA)
-bluealsa &
-
-# Ensure ALSA is using the correct device
-amixer cset numid=3 1
-
-# Start Pulseaudio (if used)
+# Start PulseAudio (if it's not already running)
 pulseaudio --start --verbose
 
-echo "Bluetooth audio receiver ready..."
-tail -f /dev/null  # Keep the container running
+# Load Bluetooth Audio Module
+pactl load-module module-bluetooth-policy
+pactl load-module module-bluetooth-discover
+
+# Set default audio sink
+DEFAULT_SINK=$(pactl list short sinks | awk '{print $2}' | head -n 1)
+if [[ -n "$DEFAULT_SINK" ]]; then
+    pactl set-default-sink "$DEFAULT_SINK"
+else
+    echo "No valid audio sink found!"
+fi
+
+# Keep the container running
+echo "Bluetooth audio receiver running..."
+tail -f /dev/null
