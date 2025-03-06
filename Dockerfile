@@ -22,7 +22,7 @@ COPY src /app
 WORKDIR /app
 
 # Make scripts executable
-RUN chmod +x /app/bluetooth_receiver.sh
+RUN chmod +x /app/src/bluetooth_receiver.sh
 
 # Start Bluetooth service and receiver script
 CMD ["/bin/bash", "/app/bluetooth_receiver.sh"]
