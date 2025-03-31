@@ -13,17 +13,19 @@ RUN apt-get update && apt-get install -y \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy config files
+# Configure PulseAudio for anonymous system-wide access
+RUN mkdir -p /var/run/pulse/.config/pulse && \
+    echo "load-module module-native-protocol-unix auth-anonymous=1" >> /etc/pulse/system.pa
+
+# Set ALSA to use PulseAudio
 COPY config/alsa.conf /etc/asound.conf
 
-# Copy scripts
+# Copy Bluetooth pairing/audio script
 COPY src /app/src
 WORKDIR /app
 
-# Make scripts executable
+# Make startup script executable
 RUN chmod +x /app/src/bluetooth_receiver.sh
 
-# Start Bluetooth service and receiver script
+# Default command to run the Bluetooth receiver setup
 CMD ["/bin/bash", "/app/src/bluetooth_receiver.sh"]
-#CMD ["bash"]
-

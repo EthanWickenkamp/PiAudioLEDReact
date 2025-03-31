@@ -20,9 +20,9 @@ echo "Bluetooth adapter found!"
 
 # ✅ Set up pairing environment
 bluetoothctl power on
-bluetoothctl agent NoInputNoOutput
 bluetoothctl discoverable on
 bluetoothctl pairable on
+bluetoothctl agent NoInputNoOutput
 bluetoothctl default-agent
 
 # Optional: Trust a known device (add your MAC address here)
