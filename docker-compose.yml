@@ -8,6 +8,6 @@ services:
     volumes:
       - /dev/:/dev/  # Allows full device access
       - /run/dbus:/run/dbus  # Required for Bluetooth
-      - /var/run/dbus:/var/run/dbus # try this instead
+
     environment:
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
