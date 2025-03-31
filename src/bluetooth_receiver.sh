@@ -14,12 +14,12 @@ done
 
 echo "Bluetooth adapter found!"
 
-# Set up Bluetooth
-bluetoothctl power on
-bluetoothctl agent on
-bluetoothctl discoverable on
-bluetoothctl pairable on
-bluetoothctl default-agent
+# # Set up Bluetooth
+# bluetoothctl power on
+# bluetoothctl agent on
+# bluetoothctl discoverable on
+# bluetoothctl pairable on
+# bluetoothctl default-agent
 
 # Start PulseAudio (if it's not already running)
 pulseaudio --start --verbose
