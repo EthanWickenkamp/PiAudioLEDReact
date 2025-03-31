@@ -15,11 +15,12 @@ RUN apt-get update && apt-get install -y \
 
 # Set PulseAudio system mode config
 RUN mkdir -p /var/run/pulse/.config/pulse && \
+    mkdir -p /usr/share/dbus-1/system.d && \
     echo "load-module module-bluetooth-discover" >> /etc/pulse/system.pa && \
     echo "load-module module-bluetooth-policy" >> /etc/pulse/system.pa && \
     echo "load-module module-native-protocol-unix auth-anonymous=1" >> /etc/pulse/system.pa && \
     echo '<policy user="pulse"><allow own="org.pulseaudio.Server"/></policy>' \
-        >> /usr/share/dbus-1/system.d/pulseaudio-system.conf
+        > /usr/share/dbus-1/system.d/pulseaudio-system.conf
 
 # Copy ALSA config for apps to talk to PulseAudio
 COPY config/alsa.conf /etc/asound.conf
