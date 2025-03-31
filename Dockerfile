@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     alsa-utils \
     pulseaudio \
     pulseaudio-utils \
+    pulseaudio-module-bluetooth \
     bluetooth \
     bluez \
     dbus \
