@@ -1,4 +1,8 @@
 #!/bin/bash
+set -e
+
+# Force 3.5mm analog output
+amixer cset numid=3 1
 
 echo "Starting Bluetooth & PulseAudio setup..."
 
@@ -24,6 +28,8 @@ bluetoothctl discoverable on
 bluetoothctl pairable on
 bluetoothctl agent NoInputNoOutput
 bluetoothctl default-agent
+
+sleep 2  # Optional: let bluetooth stack settle
 
 # Set default sink if available
 DEFAULT_SINK=$(pactl list short sinks | grep bluez | awk '{print $2}' | head -n 1)

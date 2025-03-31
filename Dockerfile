@@ -14,24 +14,25 @@ RUN apt-get update && apt-get install -y \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-# Set PulseAudio system mode config
+# Create directories and fix PulseAudio cookie/auth issues
 RUN mkdir -p /var/run/pulse/.config/pulse && \
+    touch /var/run/pulse/.config/pulse/cookie && \
     mkdir -p /usr/share/dbus-1/system.d && \
     echo "load-module module-bluetooth-discover" >> /etc/pulse/system.pa && \
     echo "load-module module-bluetooth-policy" >> /etc/pulse/system.pa && \
     echo "load-module module-native-protocol-unix auth-anonymous=1" >> /etc/pulse/system.pa && \
     echo '<policy user="pulse"><allow own="org.pulseaudio.Server"/></policy>' \
-        > /usr/share/dbus-1/system.d/pulseaudio-system.conf
+      > /usr/share/dbus-1/system.d/pulseaudio-system.conf
 
-# Copy ALSA config for apps to talk to PulseAudio
+# Set ALSA to use PulseAudio
 COPY config/alsa.conf /etc/asound.conf
 
-# Copy setup script
+# Copy Bluetooth receiver script
 COPY src /app/src
 WORKDIR /app
 
-# Make script executable
+# Ensure script is executable
 RUN chmod +x /app/src/bluetooth_receiver.sh
 
-# Start script
+# Default command
 CMD ["/bin/bash", "/app/src/bluetooth_receiver.sh"]
