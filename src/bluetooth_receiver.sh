@@ -11,9 +11,9 @@ if [ -e /run/pulse/pid ]; then
 fi
 rm -f /run/pulse/native
 
-# Start PulseAudio as the pulse user
+# Start PulseAudio as root in system mode
 echo "Starting PulseAudio..."
-su -s /bin/bash pulse -c "pulseaudio --system --disallow-exit --no-cpu-limit --log-target=stderr &"
+pulseaudio --system --disallow-exit --no-cpu-limit --log-target=stderr &
 sleep 2
 
 # Wait for Bluetooth adapter
@@ -23,16 +23,16 @@ until bluetoothctl show | grep -q "Controller"; do
 done
 echo "Bluetooth adapter found!"
 
-# Set up Bluetooth pairing
+# Bluetooth pairing setup
 bluetoothctl power on
 bluetoothctl discoverable on
 bluetoothctl pairable on
 bluetoothctl agent NoInputNoOutput
 bluetoothctl default-agent
 
-sleep 2  # Let stack settle
+sleep 2
 
-# Set default Bluetooth audio sink
+# Set default sink (Bluetooth)
 DEFAULT_SINK=$(pactl list short sinks | grep bluez | awk '{print $2}' | head -n 1)
 if [[ -n "$DEFAULT_SINK" ]]; then
     pactl set-default-sink "$DEFAULT_SINK"
