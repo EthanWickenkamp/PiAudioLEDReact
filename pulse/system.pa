@@ -1,19 +1,21 @@
-# etc/pulse/system.pa
+#!/usr/bin/pulseaudio -nF
+# Load modules for Bluetooth audio sink
 
-# Allow clients to connect to PulseAudio over UNIX socket
+.ifexists module-native-protocol-unix.so
 load-module module-native-protocol-unix auth-anonymous=1
+.endif
 
-# Auto-discover Bluetooth devices
+.ifexists module-bluetooth-discover.so
 load-module module-bluetooth-discover
+.endif
 
-# Apply default Bluetooth policy
+.ifexists module-bluez5-discover.so
+load-module module-bluez5-discover
+.endif
+
 load-module module-bluetooth-policy
-
-# Optional (for 3.5mm jack or other hardware output)
-# load-module module-udev-detect
-
-# Optional: Set default sink (if known)
-# set-default-sink alsa_output.platform-bcm2835_audio.analog-stereo
-
-#automatically switch to a newly connected bluetooth device
 load-module module-switch-on-connect
+
+# Optional: Automatically set the Bluetooth device as default sink when connected
+# Can be overridden by client config or dynamically
+# set-default-sink bluez_sink.XX_XX_XX_XX_XX_XX.a2dp_sink
