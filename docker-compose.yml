@@ -9,5 +9,6 @@ services:
       - /dev/snd:/dev/snd
       - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
       - /etc/machine-id:/etc/machine-id:ro
+      - /run/pulse:/run/pulse
     environment:
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
