@@ -1,9 +1,14 @@
 #!/bin/bash
 set -e
 
-# echo "🔧 Starting DBus and udev..."
-# dbus-daemon --system --nofork &
-# udevd &
+echo "🧹 Cleaning up stale PulseAudio runtime state..."
+rm -rf /run/pulse /var/run/pulse /var/lib/pulse ~/.config/pulse ~/.pulse
+
+echo "🔧 Starting DBus and udev..."
+dbus-daemon --system --nofork &
+udevd &
+
+
 
 echo "📲 Starting bluetoothd..."
 bluetoothd --experimental &
