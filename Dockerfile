@@ -24,6 +24,6 @@ WORKDIR /app
 RUN chmod +x /app/src/bluetooth_receiver.sh
 
 # Start Bluetooth service and receiver script
-#CMD ["/bin/bash", "/app/src/bluetooth_receiver.sh"]
-CMD ["/bin/bash"]
+CMD ["/bin/bash", "/app/src/bluetooth_receiver.sh"]
+#CMD ["bash"]
 

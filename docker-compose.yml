@@ -9,6 +9,7 @@ services:
       - /dev/:/dev/  # Allows full device access
       - /run/dbus:/run/dbus
       - /var/run/dbus:/var/run/dbus
+      - /etc/machine-id:/etc/machine-id:ro
 
     environment:
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
