@@ -32,7 +32,7 @@ bluetoothctl pairable on
 # Setup Bluetooth agent
 echo "Setting up Bluetooth agent..."
 bluetoothctl agent NoInputNoOutput || echo "⚠️ Failed to register agent"
-bluetoothctl default-agent || echo "⚠️ Failed to set default age
+bluetoothctl default-agent || echo "⚠️ Failed to set default age"
 sleep 2
 
 # Set default audio sink to Bluetooth (if available)
