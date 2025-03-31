@@ -4,9 +4,13 @@ set -e
 echo "🧹 Cleaning up stale PulseAudio runtime state..."
 rm -rf /run/pulse /var/run/pulse /var/lib/pulse ~/.config/pulse ~/.pulse
 
-echo "🔧 Starting DBus and udev..."
-dbus-daemon --system --nofork &
-udevd &
+
+if ! pgrep -x dbus-daemon > /dev/null; then
+  echo "🔧 Starting D-Bus..."
+  dbus-daemon --system --nofork &
+else
+  echo "⚠️ D-Bus already running, skipping manual start"
+fi
 
 
 

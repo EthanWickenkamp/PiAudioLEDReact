@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
     bluetooth \
     bluez \
     dbus \
-    udev \
     libasound2 \
     python3 \
     python3-dbus \
