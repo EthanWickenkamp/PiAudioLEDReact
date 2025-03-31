@@ -10,7 +10,10 @@ load-module module-bluetooth-discover
 load-module module-bluetooth-policy
 
 # Optional (for 3.5mm jack or other hardware output)
-load-module module-udev-detect
+# load-module module-udev-detect
+
+# Optional: Set default sink (if known)
+# set-default-sink alsa_output.platform-bcm2835_audio.analog-stereo
 
 #automatically switch to a newly connected bluetooth device
 load-module module-switch-on-connect

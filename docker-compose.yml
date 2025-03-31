@@ -1,13 +1,17 @@
 services:
   audio-processor:
     build: .
-    container_name: bluetooth_audio
+    container_name: PiAudio
     privileged: true
     network_mode: host
+    devices: 
+      - /dev/snd
     volumes:
-      - /dev/snd:/dev/snd
+      - ./config/asound.conf:/etc/asound.conf:ro
       - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
       - /etc/machine-id:/etc/machine-id:ro
-      - /run/pulse:/run/pulse
+      - ./app:/app
+      - ./pulse:/etc/pulse:ro
     environment:
+      - PULSE_RUNTIME_PATH=/run/pulse
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket

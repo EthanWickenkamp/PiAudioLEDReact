@@ -44,3 +44,7 @@ docker ps
 docker logs -f bluetooth_audio
 ```
 
+
+
+## Route
+3.5 mm jack -> ALSA -> PulseAudio -> Dbus -> bluez daemon -> A2DP sink -> phones bluetooth
