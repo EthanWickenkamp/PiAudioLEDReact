@@ -1,15 +1,13 @@
-
 services:
   audio-processor:
     build: .
     container_name: bluetooth_audio
-    privileged: true  # Allows access to Bluetooth and sound
-    network_mode: "host"  # Required for Bluetooth audio
+    privileged: true
+    network_mode: host
     volumes:
-      - /dev/:/dev/  # Allows full device access
+      - /dev:/dev
       - /dev/snd:/dev/snd
       - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
       - /etc/machine-id:/etc/machine-id:ro
-
     environment:
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
