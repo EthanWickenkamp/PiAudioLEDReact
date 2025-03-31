@@ -22,7 +22,7 @@ RUN echo "load-module module-bluetooth-discover" >> /etc/pulse/system.pa && \
 # Set D-Bus policy to allow *any* user (including root) to register PulseAudio D-Bus service
 RUN mkdir -p /usr/share/dbus-1/system.d && \
     echo '<policy context="default"><allow own="org.pulseaudio.Server"/></policy>' \
-        > /usr/share/dbus-1/system.d/pulseaudio-system.conf
+    > /usr/share/dbus-1/system.d/pulseaudio-system.conf
 
 # ALSA config to route apps through PulseAudio
 COPY config/alsa.conf /etc/asound.conf

@@ -3,27 +3,28 @@ set -e
 
 echo "Starting Bluetooth & PulseAudio setup..."
 
-# Kill stale PulseAudio
+# Kill old PulseAudio
 if [ -e /run/pulse/pid ]; then
-    echo "Killing stale PulseAudio instance..."
+    echo "Killing stale PulseAudio..."
     kill -9 "$(cat /run/pulse/pid)" || true
     rm -f /run/pulse/pid
 fi
+
+# Remove stale socket (bind() fails otherwise)
 rm -f /run/pulse/native
 
-# Start PulseAudio as root in system mode
+# Start PulseAudio
 echo "Starting PulseAudio..."
 pulseaudio --system --disallow-exit --no-cpu-limit --log-target=stderr &
 sleep 2
 
-# Wait for Bluetooth adapter
+# Bluetooth stuff
 echo "Waiting for Bluetooth adapter..."
 until bluetoothctl show | grep -q "Controller"; do
     sleep 2
 done
 echo "Bluetooth adapter found!"
 
-# Bluetooth pairing setup
 bluetoothctl power on
 bluetoothctl discoverable on
 bluetoothctl pairable on
@@ -32,7 +33,6 @@ bluetoothctl default-agent
 
 sleep 2
 
-# Set default sink (Bluetooth)
 DEFAULT_SINK=$(pactl list short sinks | grep bluez | awk '{print $2}' | head -n 1)
 if [[ -n "$DEFAULT_SINK" ]]; then
     pactl set-default-sink "$DEFAULT_SINK"
