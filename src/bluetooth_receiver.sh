@@ -3,8 +3,8 @@
 echo "Starting Bluetooth & PulseAudio setup..."
 
 # Start DBus and Bluetooth
-service dbus start
-service bluetooth start
+# service dbus start
+# service bluetooth start
 
 # Wait for Bluetooth adapter to be available
 echo "Waiting for Bluetooth adapter..."
