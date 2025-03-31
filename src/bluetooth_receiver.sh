@@ -29,8 +29,10 @@ echo "Bluetooth adapter found!"
 bluetoothctl power on
 bluetoothctl discoverable on
 bluetoothctl pairable on
-bluetoothctl agent NoInputNoOutput
-bluetoothctl default-agent
+# Setup Bluetooth agent
+echo "Setting up Bluetooth agent..."
+bluetoothctl agent NoInputNoOutput || echo "⚠️ Failed to register agent"
+bluetoothctl default-agent || echo "⚠️ Failed to set default age
 sleep 2
 
 # Set default audio sink to Bluetooth (if available)
