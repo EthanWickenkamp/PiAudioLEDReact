@@ -1,8 +1,4 @@
 #!/bin/bash
-set -e
-
-# Force 3.5mm analog output
-amixer cset numid=3 1
 
 echo "Starting Bluetooth & PulseAudio setup..."
 
