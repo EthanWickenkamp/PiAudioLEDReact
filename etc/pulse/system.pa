@@ -1,0 +1,13 @@
+# etc/pulse/system.pa
+
+# Allow clients to connect to PulseAudio over UNIX socket
+load-module module-native-protocol-unix auth-anonymous=1
+
+# Auto-discover Bluetooth devices
+load-module module-bluetooth-discover
+
+# Apply default Bluetooth policy
+load-module module-bluetooth-policy
+
+# Optional (for 3.5mm jack or other hardware output)
+load-module module-udev-detect
