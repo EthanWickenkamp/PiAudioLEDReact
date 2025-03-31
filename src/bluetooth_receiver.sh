@@ -1,14 +1,13 @@
 #!/bin/bash
+set -e
 
 echo "Starting Bluetooth & PulseAudio setup..."
 
-# Start PulseAudio only if not running
+# Start PulseAudio in system mode if not already running
 if ! pactl info > /dev/null 2>&1; then
     echo "Starting PulseAudio..."
     pulseaudio --system --disallow-exit --no-cpu-limit --log-target=stderr &
     sleep 2
-else
-    echo "PulseAudio already running."
 fi
 
 # Wait for Bluetooth adapter
@@ -18,16 +17,17 @@ until bluetoothctl show | grep -q "Controller"; do
 done
 echo "Bluetooth adapter found!"
 
-# Set up Bluetooth pairing
+# Bluetooth pairing setup
 bluetoothctl power on
 bluetoothctl discoverable on
 bluetoothctl pairable on
 bluetoothctl agent NoInputNoOutput
 bluetoothctl default-agent
 
-sleep 2  # Optional: let bluetooth stack settle
+# Let Bluetooth stack settle
+sleep 2
 
-# Set default sink if available
+# Set default Bluetooth sink (if connected)
 DEFAULT_SINK=$(pactl list short sinks | grep bluez | awk '{print $2}' | head -n 1)
 if [[ -n "$DEFAULT_SINK" ]]; then
     pactl set-default-sink "$DEFAULT_SINK"
