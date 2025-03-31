@@ -7,7 +7,7 @@ services:
     network_mode: "host"  # Required for Bluetooth audio
     volumes:
       - /dev/:/dev/  # Allows full device access
-      - /run/dbus:/run/dbus  # Required for Bluetooth
+      # - /run/dbus:/run/dbus  # Required for Bluetooth
 
     environment:
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
