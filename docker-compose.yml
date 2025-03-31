@@ -5,7 +5,6 @@ services:
     privileged: true
     network_mode: host
     volumes:
-      - /dev:/dev
       - /dev/snd:/dev/snd
       - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
       - /etc/machine-id:/etc/machine-id:ro

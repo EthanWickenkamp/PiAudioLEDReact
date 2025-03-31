@@ -11,3 +11,6 @@ load-module module-bluetooth-policy
 
 # Optional (for 3.5mm jack or other hardware output)
 load-module module-udev-detect
+
+#automatically switch to a newly connected bluetooth device
+load-module module-switch-on-connect

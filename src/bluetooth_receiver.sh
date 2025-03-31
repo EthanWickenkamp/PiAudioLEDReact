@@ -1,49 +1,52 @@
 #!/bin/bash
 set -e
 
-echo "Starting Bluetooth & PulseAudio setup..."
+echo "🔄 Starting Bluetooth & PulseAudio setup..."
 
-# Kill stale PulseAudio
-if [ -e /run/pulse/pid ]; then
-    echo "Killing stale PulseAudio..."
-    kill -9 "$(cat /run/pulse/pid)" || true
-    rm -f /run/pulse/pid
-fi
 
-# Remove stale socket
+# Remove stale PulseAudio socket
 rm -f /run/pulse/native
 
-# Start PulseAudio
-echo "Starting PulseAudio..."
+# Start Bluetooth daemon
+echo "🚀 Starting Bluetooth daemon..."
+bluetoothd &
+sleep 2
+
+# Start PulseAudio in system mode
+echo "🔊 Starting PulseAudio..."
 pulseaudio --system --disallow-exit --no-cpu-limit --log-target=stderr &
 sleep 2
 
-# Wait for Bluetooth adapter
-echo "Waiting for Bluetooth adapter..."
+# Wait for Bluetooth adapter to appear
+echo "🔍 Waiting for Bluetooth adapter..."
 until bluetoothctl show | grep -q "Controller"; do
     sleep 2
 done
-echo "Bluetooth adapter found!"
+echo "✅ Bluetooth adapter ready."
 
-# Setup Bluetooth agent
-bluetoothctl power on
-bluetoothctl discoverable on
-bluetoothctl pairable on
-# Setup Bluetooth agent
-echo "Setting up Bluetooth agent..."
-bluetoothctl agent NoInputNoOutput || echo "⚠️ Failed to register agent"
-bluetoothctl default-agent || echo "⚠️ Failed to set default age"
+# Configure Bluetooth agent
+echo "⚙️ Configuring Bluetooth agent..."
+bluetoothctl << EOF
+power on
+agent NoInputNoOutput
+default-agent
+discoverable on
+pairable on
+EOF
+
+# Wait for user to connect
 sleep 2
 
-# Set default audio sink to Bluetooth (if available)
-echo "Checking for Bluetooth audio sink..."
+# Optional: Set Bluetooth sink as default if connected
+echo "🎧 Checking for Bluetooth audio sink..."
 DEFAULT_SINK=$(pactl list short sinks | grep bluez | awk '{print $2}' | head -n 1)
 if [[ -n "$DEFAULT_SINK" ]]; then
     pactl set-default-sink "$DEFAULT_SINK"
     echo "✅ Default sink set to: $DEFAULT_SINK"
 else
-    echo "⚠️ No valid Bluetooth audio sink found!"
+    echo "⚠️ No Bluetooth sink found yet — will auto-route on connect."
 fi
 
-echo "🎵 Bluetooth audio receiver running..."
+echo "✅ Bluetooth audio receiver is running and ready!"
+# Keep container alive
 tail -f /dev/null
