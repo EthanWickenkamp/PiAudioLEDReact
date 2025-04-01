@@ -1,7 +1,7 @@
-# etc/pulse/default.pa
-# Not used in system mode
-#!/usr/bin/pulseaudio -nF
-# Automatically load drivers for Bluetooth hardware
+.ifexists module-native-protocol-unix.so
+load-module module-native-protocol-unix auth-anonymous=1
+.endif
+
 .ifexists module-bluetooth-discover.so
 load-module module-bluetooth-discover
 .endif
@@ -10,9 +10,5 @@ load-module module-bluetooth-discover
 load-module module-bluez5-discover
 .endif
 
-load-module module-native-protocol-unix auth-anonymous=1
-load-module module-switch-on-connect
 load-module module-bluetooth-policy
-
-# Optional: set default sink for testing
-# set-default-sink bluez_sink.<mac_address>.a2dp_sink
+load-module module-switch-on-connect

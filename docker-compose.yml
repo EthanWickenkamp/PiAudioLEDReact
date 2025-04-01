@@ -14,7 +14,6 @@ services:
 
       - ./pulse:/etc/pulse:ro
       - ./config/bluez-main.conf:/etc/bluetooth/main.conf:ro
-      - ./config/pulseaudio.conf:/etc/dbus-1/system.d/pulseaudio.conf:ro
     environment:
       - PULSE_RUNTIME_PATH=/run/pulse
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
