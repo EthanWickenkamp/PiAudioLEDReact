@@ -10,8 +10,9 @@ echo "🧹 Cleaning stale PulseAudio files..."
 rm -rf /tmp/xdg/pulse
 rm -rf /home/audiouser/.config/pulse
 
-mkdir -p /tmp/xdg/pulse
-chmod 700 /tmp/xdg/pulse
+mkdir -p /tmp/xdg
+chown -R audiouser:audiouser /tmp/xdg
+chmod 700 /tmp/xdg
 
 mkdir -p /home/audiouser/.config/pulse
 chown -R audiouser:audiouser /home/audiouser/.config/pulse
