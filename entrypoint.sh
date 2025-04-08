@@ -3,7 +3,6 @@ set -e
 
 echo "📲 Starting bluetoothd as root..."
 bluetoothd --experimental --debug > /tmp/bluetoothd.log 2>&1 &
-
 sleep 2
 
 echo "🧹 Cleaning stale PulseAudio files..."
@@ -50,21 +49,34 @@ echo "🔁 Starting auto-trust loop..."
   done
 ) &
 
-# 🔁 Loopback Bluetooth audio to 3.5mm jack if available
-echo "🔁 Waiting for Bluetooth source to become available..."
+# 🔁 Auto-loopback Bluetooth → analog jack
+echo "🎧 Waiting for Bluetooth A2DP source and analog sink..."
 
 (
-  while true; do
+  looped=0
+  while [ $looped -eq 0 ]; do
     su - audiouser -c '
       export XDG_RUNTIME_DIR=/tmp/xdg
 
-      source_name=$(pactl list short sources | grep bluez_source | awk "{print \$2}")
-      sink_name=$(pactl list short sinks | grep bcm2835 | awk "{print \$2}")
+      source_line=$(pactl list short sources | grep bluez_source || true)
+      sink_line=$(pactl list short sinks | grep bcm2835 || true)
 
-      if [ -n "$source_name" ] && [ -n "$sink_name" ]; then
-        echo "🔊 Looping Bluetooth source ($source_name) to sink ($sink_name)"
+      if [[ -n "$source_line" && -n "$sink_line" ]]; then
+        source_name=$(echo "$source_line" | awk "{print \$2}")
+        sink_name=$(echo "$sink_line" | awk "{print \$2}")
+
+        echo "🔊 Bluetooth source: $source_name"
+        echo "🎚️  Analog sink: $sink_name"
+
+        echo "🔁 Creating loopback from $source_name → $sink_name"
         pactl load-module module-loopback source=$source_name sink=$sink_name latency_msec=50
-        exit 0
+
+        echo "🔈 Setting volume to 80% on sink: $sink_name"
+        pactl set-sink-volume "$sink_name" 80%
+
+        looped=1
+      else
+        echo "⏳ Waiting for source/sink... Retrying in 5s"
       fi
     '
     sleep 5
