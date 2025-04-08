@@ -10,15 +10,11 @@ services:
       - /dev/bus/usb
       - /dev/ttyAMA0
     volumes:
+      #- /etc/machine-id:/etc/machine-id:ro
       - ./config/asound.conf:/etc/asound.conf:ro
       - /run/dbus:/run/dbus
       #- /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
       - ./pulse:/etc/pulse
-
-
-      #- /etc/machine-id:/etc/machine-id:ro
       - ./config/bluez-main.conf:/etc/bluetooth/main.conf:ro
     environment:
       PULSE_RUNTIME_PATH: /tmp/xdg/pulse
-      #- PULSE_RUNTIME_PATH=/run/pulse
-      #- DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
