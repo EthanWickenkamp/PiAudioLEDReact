@@ -83,5 +83,5 @@ echo "🎧 Waiting for Bluetooth A2DP source and analog sink..."
   done
 ) &
 
-echo "✅ Bluetooth audio sink is ready!"
+echo "✅ Bluetooth audio sink is ready! "
 sleep infinity
