@@ -19,12 +19,25 @@ chown -R audiouser:audiouser /home/audiouser/.config/pulse
 echo "👤 Starting PulseAudio as audiouser..."
 su - audiouser -c "
   export XDG_RUNTIME_DIR=/tmp/xdg
-  export PULSE_SERVER=''
+  export PULSE_SERVER=unix:/tmp/xdg/pulse/native
+  mkdir -p /tmp/xdg/pulse
+  chmod 700 /tmp/xdg/pulse
   pulseaudio --start --disallow-exit --exit-idle-time=-1 --daemonize=yes
 "
 
+# Add debug info to see if socket was created
+echo "🔍 Checking PulseAudio socket..."
+ls -la /tmp/xdg/pulse/
 sleep 3
-echo "✅ PulseAudio started, continuing to bluetooth setup..."
+
+echo "🔌 Loading Bluetooth modules for PulseAudio..."
+su - audiouser -c "
+  export XDG_RUNTIME_DIR=/tmp/xdg
+  pactl load-module module-bluetooth-discover
+  pactl load-module module-bluetooth-policy
+  pactl load-module module-switch-on-connect
+"
+
 
 echo "🔗 Configuring bluetoothctl..."
 su - audiouser -c "bluetoothctl << EOF
@@ -36,52 +49,29 @@ pairable on
 EOF
 "
 
-# 🔁 Start auto-trust loop
-echo "🔁 Starting auto-trust loop..."
-(
-  while true; do
-    su - audiouser -c '
-      bluetoothctl paired-devices | awk "{print \$2}" | while read -r mac; do
-        bluetoothctl trust "$mac" > /dev/null 2>&1
-      done
-    '
-    sleep 5
-  done
-) &
+# After starting PulseAudio
+echo "🔊 Testing ALSA devices:"
+su - audiouser -c "aplay -l"
 
-# 🔁 Auto-loopback Bluetooth → analog jack
-echo "🎧 Waiting for Bluetooth A2DP source and analog sink..."
+echo "🎛️ Testing PulseAudio modules:"
+su - audiouser -c "pactl list modules short"
 
-(
-  looped=0
-  while [ $looped -eq 0 ]; do
-    su - audiouser -c '
-      export XDG_RUNTIME_DIR=/tmp/xdg
+echo "🎧 Testing Bluetooth devices:"
+su - audiouser -c "bluetoothctl devices"
 
-      source_line=$(pactl list short sources | grep bluez_source || true)
-      sink_line=$(pactl list short sinks | grep bcm2835 || true)
+# # 🔁 Start auto-trust loop
+# echo "🔁 Starting auto-trust loop..."
+# (
+#   while true; do
+#     su - audiouser -c '
+#       bluetoothctl paired-devices | awk "{print \$2}" | while read -r mac; do
+#         bluetoothctl trust "$mac" > /dev/null 2>&1
+#       done
+#     '
+#     sleep 5
+#   done
+# ) &
 
-      if [[ -n "$source_line" && -n "$sink_line" ]]; then
-        source_name=$(echo "$source_line" | awk "{print \$2}")
-        sink_name=$(echo "$sink_line" | awk "{print \$2}")
-
-        echo "🔊 Bluetooth source: $source_name"
-        echo "🎚️  Analog sink: $sink_name"
-
-        echo "🔁 Creating loopback from $source_name → $sink_name"
-        pactl load-module module-loopback source=$source_name sink=$sink_name latency_msec=50
-
-        echo "🔈 Setting volume to 80% on sink: $sink_name"
-        pactl set-sink-volume "$sink_name" 80%
-
-        looped=1
-      else
-        echo "⏳ Waiting for source/sink... Retrying in 5s"
-      fi
-    '
-    sleep 5
-  done
-) &
 
 echo "✅ Bluetooth audio sink is ready! "
 sleep infinity
