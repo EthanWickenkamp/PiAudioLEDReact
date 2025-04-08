@@ -22,10 +22,11 @@ echo "👤 Starting PulseAudio as audiouser..."
 su - audiouser -c "
   export XDG_RUNTIME_DIR=/tmp/xdg
   export PULSE_SERVER=''
-  pulseaudio --start --disallow-exit --exit-idle-time=-1 --daemonize=no
+  pulseaudio --start --disallow-exit --exit-idle-time=-1 --daemonize=yes
 "
 
 sleep 3
+echo "✅ PulseAudio started, continuing to bluetooth setup..."
 
 echo "🔗 Setting up bluetoothctl..."
 su - audiouser -c "bluetoothctl << EOF
