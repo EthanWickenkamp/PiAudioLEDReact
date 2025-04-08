@@ -1,26 +1,25 @@
 #!/bin/bash
 set -e
 
-
-export PULSE_SERVER=""
-echo "🔊 Starting PulseAudio..."
-pulseaudio --start --disallow-exit --exit-idle-time=-1 --daemonize=no &
+echo "📲 Starting bluetoothd as root..."
+bluetoothd --experimental &
 
 sleep 2
 
-echo "📲 Starting bluetoothd..."
-bluetoothd --experimental &
+echo "👤 Switching to 'audiouser' and starting PulseAudio..."
+su - audiouser -c "export PULSE_SERVER=''; pulseaudio --start --disallow-exit --exit-idle-time=-1 --daemonize=no &"
 
 sleep 3
 
 echo "🔗 Setting up bluetoothctl..."
-bluetoothctl << EOF
+su - audiouser -c "bluetoothctl << EOF
 power on
 agent NoInputNoOutput
 default-agent
 discoverable on
 pairable on
 EOF
+"
 
 echo "✅ Bluetooth audio sink is ready!"
 sleep infinity

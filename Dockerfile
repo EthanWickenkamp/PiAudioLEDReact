@@ -25,8 +25,5 @@ COPY app/ /app/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Switch to non-root user
-USER audiouser
-
 # Set default command
 CMD ["/bin/bash", "/entrypoint.sh"]
