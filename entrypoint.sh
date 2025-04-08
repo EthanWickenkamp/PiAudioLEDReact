@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+
+export PULSE_SERVER=""
 echo "🔊 Starting PulseAudio..."
 pulseaudio --start --disallow-exit --exit-idle-time=-1 --daemonize=no &
 
