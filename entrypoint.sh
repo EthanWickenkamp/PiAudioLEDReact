@@ -37,7 +37,7 @@ pairable on
 EOF
 "
 
-# 🔁 Start background loop to auto-trust all paired devices
+# 🔁 Start auto-trust loop
 echo "🔁 Starting auto-trust loop..."
 (
   while true; do
@@ -45,6 +45,27 @@ echo "🔁 Starting auto-trust loop..."
       bluetoothctl paired-devices | awk "{print \$2}" | while read -r mac; do
         bluetoothctl trust "$mac" > /dev/null 2>&1
       done
+    '
+    sleep 5
+  done
+) &
+
+# 🔁 Loopback Bluetooth audio to 3.5mm jack if available
+echo "🔁 Waiting for Bluetooth source to become available..."
+
+(
+  while true; do
+    su - audiouser -c '
+      export XDG_RUNTIME_DIR=/tmp/xdg
+
+      source_name=$(pactl list short sources | grep bluez_source | awk "{print \$2}")
+      sink_name=$(pactl list short sinks | grep bcm2835 | awk "{print \$2}")
+
+      if [ -n "$source_name" ] && [ -n "$sink_name" ]; then
+        echo "🔊 Looping Bluetooth source ($source_name) to sink ($sink_name)"
+        pactl load-module module-loopback source=$source_name sink=$sink_name latency_msec=50
+        exit 0
+      fi
     '
     sleep 5
   done
