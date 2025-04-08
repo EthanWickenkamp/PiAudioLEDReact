@@ -4,6 +4,7 @@ services:
     container_name: PiAudio
     privileged: true
     network_mode: host
+    pid: host
     devices: 
       - /dev/snd
     volumes:
