@@ -88,3 +88,33 @@ environment:
         XDG_RUNTIME_DIR: /tmp/xdg
         PULSE_SERVER: unix:/tmp/xdg/pulse/native
 ```
+
+### Dbus
+just mount the socket in compose
+```yml
+- /run/dbus:/run/dbus
+```
+### bluez daemon
+start this as root before pulse audio
+```bash
+bluetoothd --experimental --debug > /tmp/bluetoothd.log 2>&1 &
+sleep 2
+```
+we also mount our config in compose if we keep this
+```yml
+- ./config/bluez-main.conf:/etc/bluetooth/main.conf:ro
+```
+
+### A2DP sink
+bluetooth module on host some config need to test further
+
+### phone bt
+need to pair by 
+``` bash
+docker compose up -d
+docker exec -it PiAudio bash
+>>>
+bluetoothctl
+>>>
+yes
+```
