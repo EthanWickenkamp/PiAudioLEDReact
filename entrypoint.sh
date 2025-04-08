@@ -6,8 +6,23 @@ bluetoothd --experimental &
 
 sleep 2
 
-echo "👤 Switching to 'audiouser' and starting PulseAudio..."
-su - audiouser -c "export PULSE_SERVER=''; pulseaudio --start --disallow-exit --exit-idle-time=-1 --daemonize=no &"
+echo "🧹 Cleaning stale PulseAudio files..."
+rm -rf /tmp/xdg/pulse
+rm -rf /home/audiouser/.config/pulse
+
+mkdir -p /tmp/xdg/pulse
+chmod 700 /tmp/xdg/pulse
+
+mkdir -p /home/audiouser/.config/pulse
+chown -R audiouser:audiouser /home/audiouser/.config/pulse
+
+# 3. Start PulseAudio as audiouser
+echo "👤 Starting PulseAudio as audiouser..."
+su - audiouser -c "
+  export XDG_RUNTIME_DIR=/tmp/xdg
+  export PULSE_SERVER=''
+  pulseaudio --start --disallow-exit --exit-idle-time=-1 --daemonize=no
+"
 
 sleep 3
 
