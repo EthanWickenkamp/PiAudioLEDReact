@@ -7,6 +7,8 @@ services:
     pid: host
     devices: 
       - /dev/snd
+      - /dev/bus/usb
+      - /dev/ttyAMA0
     volumes:
       - ./config/asound.conf:/etc/asound.conf:ro
       - /run/dbus:/run/dbus
