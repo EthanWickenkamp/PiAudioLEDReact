@@ -1,14 +1,4 @@
-.ifexists module-native-protocol-unix.so
-load-module module-native-protocol-unix auth-anonymous=1
-.endif
-
-.ifexists module-bluetooth-discover.so
-load-module module-bluetooth-discover
-.endif
-
-.ifexists module-bluez5-discover.so
-load-module module-bluez5-discover
-.endif
-
+load-module module-udev-detect
+load-module module-native-protocol-unix
 load-module module-bluetooth-policy
-load-module module-switch-on-connect
+load-module module-bluetooth-discover

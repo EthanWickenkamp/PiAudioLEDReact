@@ -1,17 +1,17 @@
 #!/bin/bash
 set -e
 
-# echo "🧹 Cleaning up stale PulseAudio runtime state..."
-# rm -rf /run/user/1000/pulse ~/.config/pulse ~/.pulse
+echo "🔊 Starting PulseAudio..."
+pulseaudio --start --disallow-exit --exit-idle-time=-1 --daemonize=no &
+
+sleep 2
 
 echo "📲 Starting bluetoothd..."
 bluetoothd --experimental &
 
-echo "🔊 Starting PulseAudio..."
-pulseaudio --start --disallow-exit --exit-idle-time=-1
-
 sleep 3
 
+echo "🔗 Setting up bluetoothctl..."
 bluetoothctl << EOF
 power on
 agent NoInputNoOutput
@@ -20,8 +20,5 @@ discoverable on
 pairable on
 EOF
 
-echo "📜 Running app..."
-python3 /app/main.py &
-
-echo "✅ Bluetooth audio sink is ready! sleep infinity now"
+echo "✅ Bluetooth audio sink is ready!"
 sleep infinity
