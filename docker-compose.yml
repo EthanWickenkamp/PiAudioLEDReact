@@ -16,5 +16,6 @@ services:
       #- /etc/machine-id:/etc/machine-id:ro
       #- ./config/bluez-main.conf:/etc/bluetooth/main.conf:ro
     environment:
+      PULSE_RUNTIME_PATH: /tmp/xdg/pulse
       #- PULSE_RUNTIME_PATH=/run/pulse
       #- DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
