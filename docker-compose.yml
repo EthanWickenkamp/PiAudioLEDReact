@@ -7,16 +7,14 @@ services:
     pid: host
     devices: 
       - /dev/snd
-      - /dev/bus/usb
-      - /dev/ttyAMA0
     volumes:
       - /etc/machine-id:/etc/machine-id:ro
       - ./config/asound.conf:/etc/asound.conf:ro
       - /run/dbus:/run/dbus
       #- /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
-      - ./pulse:/etc/pulse
+      #- /run/user/1000/pulse:/run/user/1000/pulse
+      #- ./pulse:/etc/pulse
       - ./config/bluez-main.conf:/etc/bluetooth/main.conf:ro
     environment:
-        PULSE_RUNTIME_PATH: /tmp/xdg/pulse
-        PULSE_SERVER: unix:/tmp/xdg/pulse/native
         XDG_RUNTIME_DIR: /tmp/xdg
+        PULSE_SERVER: unix:/tmp/xdg/pulse/native
