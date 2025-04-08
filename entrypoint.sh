@@ -2,7 +2,7 @@
 set -e
 
 echo "📲 Starting bluetoothd as root..."
-bluetoothd --experimental &
+bluetoothd --experimental --debug > /tmp/bluetoothd.log 2>&1 &
 
 sleep 2
 
@@ -17,7 +17,6 @@ chmod 700 /tmp/xdg
 mkdir -p /home/audiouser/.config/pulse
 chown -R audiouser:audiouser /home/audiouser/.config/pulse
 
-# 3. Start PulseAudio as audiouser
 echo "👤 Starting PulseAudio as audiouser..."
 su - audiouser -c "
   export XDG_RUNTIME_DIR=/tmp/xdg
@@ -28,7 +27,7 @@ su - audiouser -c "
 sleep 3
 echo "✅ PulseAudio started, continuing to bluetooth setup..."
 
-echo "🔗 Setting up bluetoothctl..."
+echo "🔗 Configuring bluetoothctl..."
 su - audiouser -c "bluetoothctl << EOF
 power on
 agent NoInputNoOutput
@@ -37,6 +36,19 @@ discoverable on
 pairable on
 EOF
 "
+
+# 🔁 Start background loop to auto-trust all paired devices
+echo "🔁 Starting auto-trust loop..."
+(
+  while true; do
+    su - audiouser -c '
+      bluetoothctl paired-devices | awk "{print \$2}" | while read -r mac; do
+        bluetoothctl trust "$mac" > /dev/null 2>&1
+      done
+    '
+    sleep 5
+  done
+) &
 
 echo "✅ Bluetooth audio sink is ready!"
 sleep infinity
