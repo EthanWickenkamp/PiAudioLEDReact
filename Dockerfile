@@ -23,7 +23,6 @@ RUN useradd -ms /bin/bash audiouser && \
 
 # Set working dir and copy files BEFORE switching users
 WORKDIR /app
-COPY app/ /app/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
