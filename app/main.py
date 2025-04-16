@@ -3,7 +3,7 @@ import time
 
 WLED_IP = "192.168.50.147"  # Replace with your actual WLED IP
 WLED_PORT = 21324
-LED_COUNT = 60            # Match your LED count
+LED_COUNT = 450            # Match your LED count
 
 def send_color(r, g, b):
     data = bytes([val for _ in range(LED_COUNT) for val in (r, g, b)])
