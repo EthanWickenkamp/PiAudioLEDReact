@@ -16,12 +16,10 @@ RUN apt-get update && apt-get install -y \
     python3-pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user and add to audio group and passwordless and permissions
-RUN useradd -u 1000 -g 1000 -ms /bin/bash audiouser && \
+# Create non-root user and add to audio group and passwordless
+RUN useradd -ms /bin/bash audiouser && \
     usermod -aG audio audiouser && \
-    passwd -d audiouser && \
-    mkdir -p /home/audiouser/.config && \
-    chown -R audiouser:audiouser /home/audiouser/.config
+    passwd -d audiouser
 
 # Set working dir and copy files BEFORE switching users
 WORKDIR /app

@@ -1,13 +1,17 @@
 #!/bin/bash
-
 set -e
 
 echo "📲 Starting bluetoothd as root..."
 bluetoothd --experimental --debug > /tmp/bluetoothd.log 2>&1 &
 sleep 2
 
+echo "🛠 Ensuring /home/audiouser/.config has correct permissions..."
+mkdir -p /home/audiouser/.config/pulse
+chown -R audiouser:audiouser /home/audiouser/.config
+
 echo "🔗 Configuring bluetoothctl as audiouser..."
 su - audiouser -c "
+  export PULSE_SERVER=unix:/run/user/1000/pulse/native
   bluetoothctl << EOF
 power on
 agent NoInputNoOutput
@@ -20,19 +24,20 @@ EOF
 echo "🔊 ALSA playback devices:"
 su - audiouser -c "aplay -l"
 
-echo "🎛️ PulseAudio modules (host):"
+echo "🎛️ PulseAudio modules:"
 su - audiouser -c "
+  export PULSE_SERVER=unix:/run/user/1000/pulse/native
   pactl list modules short
 "
 
 echo "🎧 Bluetooth devices:"
 su - audiouser -c "
+  export PULSE_SERVER=unix:/run/user/1000/pulse/native
   bluetoothctl devices
 "
 
-echo "✅ Connected to host PulseAudio at \$PULSE_SERVER"
+echo "✅ Bluetooth audio sink is ready!"
 sleep infinity
-
 
 
 
