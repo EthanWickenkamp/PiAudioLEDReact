@@ -11,8 +11,17 @@ services:
       - /etc/machine-id:/etc/machine-id:ro
       - ./config/asound.conf:/etc/asound.conf:ro
       - /run/dbus:/run/dbus
-      - ./pulse:/etc/pulse
       - ./config/bluez-main.conf:/etc/bluetooth/main.conf:ro
+      - /run/user/1000/pulse:/run/user/1000/pulse                   # <-- host PulseAudio socket
+      - /home/pi/.config/pulse/cookie:/home/audiouser/.config/pulse/cookie:ro  # <-- cookie auth
     environment:
-      XDG_RUNTIME_DIR: /tmp/xdg
-      PULSE_SERVER: unix:/tmp/xdg/pulse/native
+      PULSE_SERVER: unix:/run/user/1000/pulse/native
+    user: "1000:1000"  # Match host user so you can access /run/user/1000
+
+      
+
+
+#- ./pulse:/etc/pulse
+#- ./xdg:/tmp/xdg 
+#XDG_RUNTIME_DIR: /tmp/xdg
+#PULSE_SERVER: unix:/tmp/xdg/pulse/native
