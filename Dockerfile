@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     dbus \
     libasound2 \
     libopenblas0 \
+    libportaudio2 \
     python3 \
     python3-dbus \
     python3-pip && \
