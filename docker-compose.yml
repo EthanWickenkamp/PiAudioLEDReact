@@ -18,6 +18,7 @@ services:
 
     environment:
       PULSE_SERVER: unix:/run/user/1000/pulse/native
-    user: "1000:1000"  # Match host user so you can access /run/user/1000
+      user: "1000:1000"  # Match host user so you can access /run/user/1000
+      #PYTHONUNBUFFERED: 1
 
       

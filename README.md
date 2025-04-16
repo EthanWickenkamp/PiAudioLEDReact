@@ -1,6 +1,6 @@
-# Raspberry Pi container
+# Raspberry Pi Bluetooth and LED Sound Reactive container
 
-
+## Raspberry Pi setup
 1. Install raspberry pi OS lite 64 bit
 
 2. ssh pi@ip-address
@@ -41,8 +41,8 @@ git pull origin main
 
 6. start docker compose build or run in detached -d and exec in
 ```bash
-docker compose up --build -d
 docker compose up --build
+docker compose up --build -d
 docker exec -it PiAudio bash
 ```
 7. check container is running and check logs
@@ -51,17 +51,19 @@ docker ps
 docker logs
 ```
 
-
-# Host machine checks
+## Host machine checks
 ```bash
 ps aux | grep pulseaudio
 ps aux | grep bluetoothd
 ps aux | grep dbus-daemon
 ```
+We are looking for pulseaudio on a specific socket
+We are looking for output audio device and card?
+Checking permissions and users
 
 
 ## Route
-3.5 mm jack -> ALSA -> PulseAudio -> Dbus -> bluez daemon -> A2DP sink -> phones bluetooth
+3.5 mm jack <- ALSA <- PulseAudio <- Dbus <- bluez daemon <- A2DP sink <- phones bluetooth
 
 ### 3.5mm jack
 system device 0
@@ -69,9 +71,9 @@ system device 0
 sudo raspi-config
 ```
 can see and edit in config on host
-
 ### ALSA
 advanced linux sound architecture
+asound.conf tells to use pulse audio?
 
 ### PulseAudio
 Install on host
@@ -80,13 +82,14 @@ apt install pulseaudio
 ```
 Mount socket from container to host
 ```yml
-- /run/user/1000/pulse:/run/user/1000/pulse
+- /run/user/1000/pulse:/run/user/1000/pulse # <-- host PulseAudio socket
+- /home/pi/.config/pulse/cookie:/home/audiouser/.config/pulse/cookie:ro  # <-- cookie auth
 ```
-instead we are using xdg
+check your etc/pulse for config details
 ```yml
 environment:
-        XDG_RUNTIME_DIR: /tmp/xdg
-        PULSE_SERVER: unix:/tmp/xdg/pulse/native
+      PULSE_SERVER: unix:/run/user/1000/pulse/native
+      user: "1000:1000"  # Match host user so you can access /run/user/1000
 ```
 
 ### Dbus
@@ -100,13 +103,15 @@ start this as root before pulse audio
 bluetoothd --experimental --debug > /tmp/bluetoothd.log 2>&1 &
 sleep 2
 ```
-we also mount our config in compose if we keep this
+we also mount our config in compose where we set rules for BT connection
 ```yml
 - ./config/bluez-main.conf:/etc/bluetooth/main.conf:ro
 ```
-
 ### A2DP sink
-bluetooth module on host some config need to test further
+bluetooth module on host
+```bash
+command to check status here
+```
 
 ### phone bt
 need to pair by 
@@ -118,3 +123,12 @@ bluetoothctl
 >>>
 yes
 ```
+need to trust device on first connection, bluetooth ctl to interface
+
+## UDP to WLED on esp32
+
+can stream led information over UDP port
+or with sound reactive fork stream fft packets
+
+need to test more to be sure 
+

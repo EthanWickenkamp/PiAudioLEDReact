@@ -28,7 +28,6 @@ RUN useradd -ms /bin/bash audiouser && \
 
 # Set working directory and copy app files
 WORKDIR /app
-COPY app/ /app/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
