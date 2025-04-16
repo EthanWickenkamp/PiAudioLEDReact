@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y \
     python3-pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Python dependencies
+RUN pip install numpy sounddevice
+
 # Create non-root user and add to audio group and passwordless
 RUN useradd -ms /bin/bash audiouser && \
     usermod -aG audio audiouser && \
