@@ -1,24 +1,26 @@
 #!/bin/bash
+
 set -e
 
 echo "📲 Starting bluetoothd as root..."
 bluetoothd --experimental --debug > /tmp/bluetoothd.log 2>&1 &
 sleep 2
 
-echo "🛠 Ensuring /home/audiouser/.config has correct permissions..."
-# Only create and fix up the parent config directory
-mkdir -p /home/audiouser/.config
-# If .config/pulse is not mounted, allow it to be created
-if [ ! -f /home/audiouser/.config/pulse/cookie ]; then
-  mkdir -p /home/audiouser/.config/pulse
-  chown -R audiouser:audiouser /home/audiouser/.config/pulse
-fi
-# Always fix ownership of the .config parent dir (just in case)
-#chown audiouser:audiouser /home/audiouser/.config
+echo "🛠 Setting up secure directories with correct permissions..."
+# Create a completely fresh directory structure
+mkdir -p /tmp/pulse
+chmod 700 /tmp/pulse
+chown audiouser:audiouser /tmp/pulse
+
+# Point to this directory instead
+export PULSE_RUNTIME_PATH="/tmp/pulse"
 
 echo "🔗 Configuring bluetoothctl as audiouser..."
 su - audiouser -c "
   export PULSE_SERVER=unix:/run/user/1000/pulse/native
+  export XDG_RUNTIME_DIR=/run/user/1000
+  export PULSE_RUNTIME_PATH=/tmp/pulse
+  
   bluetoothctl << EOF
 power on
 agent NoInputNoOutput
@@ -29,22 +31,88 @@ EOF
 "
 
 echo "🔊 ALSA playback devices:"
-su - audiouser -c "aplay -l"
+su - audiouser -c "
+  export PULSE_SERVER=unix:/run/user/1000/pulse/native
+  export XDG_RUNTIME_DIR=/run/user/1000
+  export PULSE_RUNTIME_PATH=/tmp/pulse
+  aplay -l
+"
 
 echo "🎛️ PulseAudio modules:"
 su - audiouser -c "
   export PULSE_SERVER=unix:/run/user/1000/pulse/native
+  export XDG_RUNTIME_DIR=/run/user/1000
+  export PULSE_RUNTIME_PATH=/tmp/pulse
   pactl list modules short
 "
 
 echo "🎧 Bluetooth devices:"
 su - audiouser -c "
   export PULSE_SERVER=unix:/run/user/1000/pulse/native
+  export XDG_RUNTIME_DIR=/run/user/1000
+  export PULSE_RUNTIME_PATH=/tmp/pulse
   bluetoothctl devices
 "
 
 echo "✅ Bluetooth audio sink is ready!"
 sleep infinity
+
+
+
+
+
+
+
+
+
+
+
+# set -e
+
+# echo "📲 Starting bluetoothd as root..."
+# bluetoothd --experimental --debug > /tmp/bluetoothd.log 2>&1 &
+# sleep 2
+
+# echo "🛠 Ensuring /home/audiouser/.config has correct permissions..."
+# # Only create and fix up the parent config directory
+# mkdir -p /home/audiouser/.config
+# # If .config/pulse is not mounted, allow it to be created
+# if [ ! -f /home/audiouser/.config/pulse/cookie ]; then
+#   mkdir -p /home/audiouser/.config/pulse
+#   chown -R audiouser:audiouser /home/audiouser/.config/pulse
+# fi
+# # Always fix ownership of the .config parent dir (just in case)
+# #chown audiouser:audiouser /home/audiouser/.config
+
+# echo "🔗 Configuring bluetoothctl as audiouser..."
+# su - audiouser -c "
+#   export PULSE_SERVER=unix:/run/user/1000/pulse/native
+#   bluetoothctl << EOF
+# power on
+# agent NoInputNoOutput
+# default-agent
+# discoverable on
+# pairable on
+# EOF
+# "
+
+# echo "🔊 ALSA playback devices:"
+# su - audiouser -c "aplay -l"
+
+# echo "🎛️ PulseAudio modules:"
+# su - audiouser -c "
+#   export PULSE_SERVER=unix:/run/user/1000/pulse/native
+#   pactl list modules short
+# "
+
+# echo "🎧 Bluetooth devices:"
+# su - audiouser -c "
+#   export PULSE_SERVER=unix:/run/user/1000/pulse/native
+#   bluetoothctl devices
+# "
+
+# echo "✅ Bluetooth audio sink is ready!"
+# sleep infinity
 
 
 
