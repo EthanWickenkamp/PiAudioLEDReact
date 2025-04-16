@@ -6,8 +6,15 @@ bluetoothd --experimental --debug > /tmp/bluetoothd.log 2>&1 &
 sleep 2
 
 echo "🛠 Ensuring /home/audiouser/.config has correct permissions..."
-mkdir -p /home/audiouser/.config/pulse
-chown -R audiouser:audiouser /home/audiouser/.config
+# Only create and fix up the parent config directory
+mkdir -p /home/audiouser/.config
+# If .config/pulse is not mounted, allow it to be created
+if [ ! -f /home/audiouser/.config/pulse/cookie ]; then
+  mkdir -p /home/audiouser/.config/pulse
+  chown -R audiouser:audiouser /home/audiouser/.config/pulse
+fi
+# Always fix ownership of the .config parent dir (just in case)
+chown audiouser:audiouser /home/audiouser/.config
 
 echo "🔗 Configuring bluetoothctl as audiouser..."
 su - audiouser -c "
