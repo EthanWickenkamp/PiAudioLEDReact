@@ -1,7 +1,7 @@
 import socket
 import time
 
-WLED_IP = "192.168.50.x"  # Replace with your actual WLED IP
+WLED_IP = "192.168.50.147"  # Replace with your actual WLED IP
 WLED_PORT = 21324
 LED_COUNT = 60            # Match your LED count
 
