@@ -1,20 +1,16 @@
-import subprocess
-import time
+import socket
 
-def get_connected_devices():
-    try:
-        output = subprocess.check_output(["bluetoothctl", "devices", "Connected"], text=True)
-        return output.strip().splitlines()
-    except subprocess.CalledProcessError:
-        return []
+WLED_IP = "192.168.50.147"  # Replace with your WLED's IP
+WLED_PORT = 21324
+LED_COUNT = 60            # Match your setup
+COLOR = [255, 0, 0]       # Bright Red
 
-print("🎧 Watching for Bluetooth audio devices...")
+def send_color(rgb):
+    packet = bytes([val for _ in range(LED_COUNT) for val in rgb])
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto(packet, (WLED_IP, WLED_PORT))
 
-while True:
-    devices = get_connected_devices()
-    if devices:
-        print("🔗 Connected:", devices)
-    else:
-        print("❌ No devices connected")
-
-    time.sleep(5)
+if __name__ == "__main__":
+    print("🌈 Sending static color to WLED...")
+    send_color(COLOR)
+    print("✅ Done!")

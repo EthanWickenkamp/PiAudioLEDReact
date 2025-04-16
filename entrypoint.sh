@@ -54,6 +54,15 @@ su - audiouser -c "
   bluetoothctl devices
 "
 
+echo "📜 Running app..."
+su - audiouser -c "
+  export PULSE_SERVER=unix:/run/user/1000/pulse/native
+  export XDG_RUNTIME_DIR=/run/user/1000
+  export PULSE_RUNTIME_PATH=/tmp/pulse
+  python3 /app/main.py
+"
+
+
 echo "✅ Bluetooth audio sink is ready!"
 sleep infinity
 
