@@ -14,7 +14,7 @@ if [ ! -f /home/audiouser/.config/pulse/cookie ]; then
   chown -R audiouser:audiouser /home/audiouser/.config/pulse
 fi
 # Always fix ownership of the .config parent dir (just in case)
-chown audiouser:audiouser /home/audiouser/.config
+#chown audiouser:audiouser /home/audiouser/.config
 
 echo "🔗 Configuring bluetoothctl as audiouser..."
 su - audiouser -c "
