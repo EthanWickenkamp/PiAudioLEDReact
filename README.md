@@ -110,7 +110,7 @@ sudo raspi-config
 `asound.conf` can route audio to PulseAudio.
 
 ### 🔁 PulseAudio
-Install (if not installed):
+Install (if not installed on host):
 ```bash
 sudo apt install pulseaudio
 ```
