@@ -5,7 +5,7 @@ import pyaudio
 
 # Configuration
 ESP32_IP = '192.168.50.147'  # Replace with your ESP32's IP
-UDP_PORT = 21324
+UDP_PORT = 11988
 CHUNK = 1024
 RATE = 44100
 CHANNELS = 1
