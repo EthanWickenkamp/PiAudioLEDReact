@@ -20,6 +20,7 @@ ssh-keygen -R <ip-address>
 
 ### 2. Install Docker
 ```bash
+sudo apt-get update
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 ```
@@ -30,7 +31,6 @@ docker compose version
 ```
 Install Docker Compose plugin if not available:
 ```bash
-sudo apt-get update
 sudo apt-get install -y docker-compose-plugin
 ```
 
