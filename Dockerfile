@@ -11,15 +11,18 @@ RUN apt-get update && apt-get install -y \
     bluez \
     dbus \
     libasound2 \
+    libasound2-dev \
     libopenblas0 \
     libportaudio2 \
+    libportaudio-dev \
     python3 \
     python3-dbus \
-    python3-pip && \
+    python3-pip \
+    build-essential && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Python libraries
-RUN pip install numpy sounddevice
+RUN pip install numpy sounddevice pyaudio
 
 # Create non-root user and add to audio group, no password
 RUN useradd -ms /bin/bash audiouser && \
