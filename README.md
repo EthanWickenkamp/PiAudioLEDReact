@@ -1,216 +1,251 @@
-# Raspberry Pi Bluetooth + WLED Sound Reactive Docker Setup
+# Raspberry Pi Bluetooth Audio Reactor
 
-A self-contained containerized setup to stream audio over Bluetooth to a Raspberry Pi and send real-time LED data to a WLED ESP32 device.
+A containerized setup for Raspberry Pi that receives Bluetooth audio, outputs it via a connected DAC HAT (or default audio output), and sends real-time audio-reactive data to WLED ESP32 devices over the network.
 
 ---
 
 ## 🧰 Raspberry Pi Setup
 
-### 1. Flash and SSH
-- Install **Raspberry Pi OS Lite (64-bit)**.
-- Boot and connect to network.
-- SSH in:
+These steps guide you through setting up a fresh Raspberry Pi OS installation for this project.
+
+### 1. Prepare Raspberry Pi OS
+- Install **Raspberry Pi OS Lite (64-bit)** using the Raspberry Pi Imager.
+- Enable SSH and configure Wi-Fi (if needed) via the Imager's advanced options before writing the SD card.
+- Boot the Raspberry Pi and ensure it's connected to your network.
+
+### 2. Initial Connection & Update
+- Find your Pi's IP address (e.g., via your router's admin page or a network scanner).
+- Connect via SSH (replace `<pi-ip-address>`):
+  ```bash
+  ssh pi@<pi-ip-address>
+
+If you've connected before, you might need `ssh-keygen -R <pi-ip-address>`
+
+Update the system:
+
+`sudo apt-get update && sudo apt-get upgrade -y`
+
+### 3. Configure Audio Output (DAC HAT Recommended)
+
+
+This project works best with a dedicated DAC
+
+Identify your **DAC HAT Overlay**, 
+
+Examples: hifiberry-dac, iqaudiodac, allo-boss-dac-pcm512x-audio
+
+Edit Boot Configuration:
+
+`sudo nano /boot/firmware/config.txt`
+Or use /boot/config.txt on older OS versions
+
+Add the following lines at the end of the file:
+
 ```bash
-ssh pi@<ip-address>
-```
-To clear known hosts (if needed):
-```bash
-ssh-keygen -R <ip-address>
+# Disable built-in audio
+dtparam=audio=off
+# Enable DAC HAT (replace with your actual overlay name)
+dtoverlay=<your-dac-overlay-name>
 ```
 
-### 2. Install Docker
+Save and Exit (Ctrl+X, then Y, then Enter).
+
+Reboot for changes to take effect:
+
+`sudo reboot`
+
+Wait for the Pi to restart, then SSH back in.
+
+### 4. Install Docker & Docker Compose
+Download and run the official Docker install script:
+
 ```bash
-sudo apt-get update
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 ```
-Verify:
+
+Add ***pi*** user to the docker group to run Docker commands without sudo:
+
+`sudo usermod -aG docker pi`
+
+`sudo reboot`
+
+Verify installation:
+
 ```bash
 docker --version
 docker compose version
 ```
-Install Docker Compose plugin if not available:
+
+If docker compose version fails, you might need
+ `sudo apt-get install -y docker-compose-plugin`
+
+### 5. Clone Project Repository
+Clone the project code (replace with your actual repository URL):
+
+`git clone https://github.com/USERNAME/REPONAME.git`
+
+`cd PiAudioLEDReact`
+
+To update later: `git pull origin main`
+
+## ✅ Host System Checks & Verification
+Before running the application verify the host system's audio device, and Pulse audio and Bluetooth server/socket.
+
+### 1. Verify Audio Device (ALSA)
+List ALSA playback devices. You should see your DAC HAT listed and not the default bcm2835 device (if disabled via dtparam=audio=off).
+
+`aplay -l`
+
+### 2. Verify PulseAudio
+Check if PulseAudio is running for the pi user (it should start automatically on modern Raspberry Pi OS Desktop, but maybe not Lite):
+
+`systemctl --user status pulseaudio.service pulseaudio.socket`
+
+If the service is not found or inactive: Install PulseAudio and enable/start the user service:
+
 ```bash
-sudo apt-get install -y docker-compose-plugin
+# Install PulseAudio packages
+sudo apt-get install -y pulseaudio pulseaudio-utils
+# Enable and start the service for the current user pi
+systemctl --user enable --now pulseaudio.service pulseaudio.socket
+# Re-check status after installing
+systemctl --user status pulseaudio.service pulseaudio.socket
 ```
 
-### 3. Add user `pi` to Docker group
+Once PulseAudio is running:
+
+List PulseAudio output sinks. Your DAC HAT should be listed, often as card 0. Note its name or index (e.g., alsa_output.platform-soc_sound_xyz.analog-stereo).
+
+`pactl list sinks short`
+
+Check the default sink:
+
+`pactl info | grep "Default Sink"`
+
+If the DAC is not the default, set it:
+
+`pactl set-default-sink <dac_sink_name_or_index>`
+
+### 3. Verify Bluetooth
+Check the Bluetooth service status:
+
+`systemctl status bluetooth`
+
+Show Bluetooth controller info:
+
+`bluetoothctl show`
+
+If Bluetooth isn't working, try: `sudo apt install -y bluez bluez-tools pulseaudio-module-bluetooth` then `sudo systemctl enable --now bluetooth`
+
+### 4. Verify D-Bus
+Check if the system D-Bus daemon is running (required for Bluetooth):
+
+`ps aux | grep 'dbus-daemon --system'`
+
+## 🚀 Running the Application
+Now you can build and start the Docker container.
+
+### 1. Build and Run:
+
 ```bash
-sudo usermod -aG docker pi
-sudo reboot
-```
+# Navigate to the project directory if you aren't already there
+cd ~/PiAudioLEDReact
 
-### 4. Clone Project
-```bash
-git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git
-cd YOUR-REPO
-```
-To update:
-```bash
-git pull origin main
-```
-## ✅ Host System Checks
-
-### PulseAudio
-```bash
-systemctl --user status pulseaudio.service
-pactl info
-pactl list sinks short
-pactl list sources short
-```
-fix
-```bash
-sudo apt install -y pulseaudio pulseaudio-utils
-systemctl --user enable pulseaudio
-systemctl --user start pulseaudio
-
-```
-
-
-### Bluetooth Daemon
-```bash
-systemctl status bluetooth
-bluetoothctl show
-```
-fix
-```bash
-sudo apt install -y bluez bluez-tools pulseaudio-module-bluetooth
-```
-
-### DBus
-```bash
-ps aux | grep dbus-daemon
-```
-
-### Audio Output Devices
-```bash
-aplay -l
-```
-
----
-
-
-
-## Start Docker Compose, make start on boot
-```bash
-docker compose up --build
-# or in detached mode:
+# Build the image and start the container(s) in detached mode
 docker compose up --build -d
-docker exec -it PiAudio bash
+#simple for if working
+docker compose up
+docker compose down
 ```
 
-### 6. Check container status
-```bash
-docker ps
-docker logs PiAudio
-```
+### 2. Check Container Status:
 
----
+`docker ps`
+
+Look for a container named PiAudio (or similar) with status "Up"
+
+View Logs:
+
+`docker logs PiAudio`
+Use `docker logs -f PiAudio` to follow logs in real-time
+
+### 3. Access Container Shell (for debugging):
+
+`docker exec -it PiAudio bash`
 
 
+### 4. To automatically start on boot
+create a `systemd` service file to run `docker compose up -d`
 
 ## 🔊 Audio Routing Overview
+The audio flows through several components:
 
-```plaintext
-Phone (Bluetooth) → A2DP Sink → BlueZ Daemon → DBus → PulseAudio → ALSA → 3.5mm Jack
-```
+**Bluetooth Device → Pi Bluetooth → BlueZ Daemon → D-Bus → Host PulseAudio → ALSA → DAC HAT** (or other default output)
 
-### 🎧 3.5mm Jack (Output)
-```bash
-sudo raspi-config
-# Configure audio output device
-```
+(Proccessing) -> Container (soundreact.py) → Network → WLED ESP32
 
-### 🎚 ALSA (Advanced Linux Sound Architecture)
-`asound.conf` can route audio to PulseAudio.
+**Bluetooth (A2DP Sink):** Managed by BlueZ and integrated with PulseAudio via pulseaudio-module-bluetooth. The container starts bluetoothctl to make the Pi discoverable/pairable.
 
-### 🔁 PulseAudio
-Install (if not installed on host):
-```bash
-sudo apt install pulseaudio
-```
-Docker Compose mounts:
-```yaml
-volumes:
-  - /run/user/1000/pulse:/run/user/1000/pulse
-  - /home/pi/.config/pulse/cookie:/home/audiouser/.config/pulse/cookie:ro
-```
-Container environment:
-```yaml
-environment:
-  PULSE_SERVER: unix:/run/user/1000/pulse/native
-user: "1000:1000"  # Match UID with host Pulse
-```
+**BlueZ & D-Bus:** The Bluetooth stack communicates system-wide via D-Bus. The container accesses the host's D-Bus socket (/run/dbus).
 
-### 🔄 DBus
-Mount host socket:
-```yaml
-- /run/dbus:/run/dbus
-```
+**PulseAudio (Host):** Crucially, the container uses the host's PulseAudio service, connecting via the mounted socket (/run/user/1000/pulse) and authentication cookie. Audio from Bluetooth appears as a source in the host's PulseAudio. Playback from the container (if any) and the primary Bluetooth output goes to the host's default PulseAudio sink (which should be your DAC HAT if configured).
 
-### 📡 BlueZ Daemon (Bluetooth)
-Start manually (inside container):
-```bash
-bluetoothd --experimental --debug > /tmp/bluetoothd.log 2>&1 &
-sleep 2
-```
-Mount config file in Compose:
-```yaml
-- ./config/bluez-main.conf:/etc/bluetooth/main.conf:ro
-```
+**ALSA:** The low-level sound system used by PulseAudio to talk to the hardware (DAC HAT).
 
-### 🎼 A2DP Sink (Bluetooth Audio)
-Ensure Bluetooth modules are loaded:
-```bash
-pactl list modules short | grep bluetooth
-```
-Use `bluetoothctl` to pair:
-```bash
-docker exec -it PiAudio bash
-bluetoothctl
-# power on
-# agent NoInputNoOutput
-# default-agent
-# discoverable on
-# pairable on
-# trust <device>
-# connect <device>
-```
+**soundreact.py:** Captures audio from the host's PulseAudio (likely a monitor of the Bluetooth source), processes it (FFT analysis), and streams LED/audio data.
 
----
+## 🌈 Sending Audio-Reactive LED Data to WLED
+The Python script (soundreact.py - check filename in /app) sends data to your WLED device(s).
 
-## 🌈 Sending Audio-Reactive LED Data to WLED (ESP32)
+WLED Setup:
 
-- WLED ESP32 must be set to **realtime override**
-- UDP packets are sent to port `21324`
-- Total LED count should match `main.py`
+Ensure your WLED device is connected to the same network as the Pi.
 
-Sample `main.py` sends brightness-adjusted RGB values via UDP:
-```python
-# RGB data is streamed to WLED using socket.sendto(...)
-# LED_COUNT = 450
-# socket.sendto(packet, ("wled3.local", 21324))
-```
+Set WLED to receive real-time UDP data: Go to WLED UI -> Config -> Sync Interfaces -> Network UDP -> Set "Receive UDP Realtime" to enabled (usually port 21324).
 
-For built-in WLED effects (e.g., VU meter), use HTTP JSON:
-```bash
-curl -X POST http://wled3.local/json/state -d '{"fx":34}'
-```
+Configuration in Script:
 
----
+You may need to edit the Python script (app/soundreact.py) to set:
+
+WLED_IP: The IP address or hostname of your WLED device (e.g., "192.168.1.100" or "wled.local"). Use <your-wled-ip-or-hostname> as placeholder if needed.
+
+WLED_PORT: Default is 21324.
+
+LED_COUNT: Ensure this matches the number of LEDs configured in WLED for accurate effects.
+
+Data Format: The script typically sends UDP packets in WLED's Realtime Protocol format (e.g., DRGB - Direct RGB).
 
 ## ✅ Summary
-- Audio flows from phone → BT → PulseAudio → Pi 3.5mm
-- LED data is computed on the Pi and streamed to WLED
-- Fully containerized with Docker Compose
-- You can exec into the container to debug audio or LED output anytime
+Installs OS, configures DAC HAT (recommended), installs Docker.
 
----
+Verifies host audio (ALSA/PulseAudio) and Bluetooth setup.
 
-## 🧪 TODO / Debug Tips
-- Check `pactl list sources short` inside container to confirm BT audio source
-- If needed, force device index in Python using `sd.query_devices()`
-- Use `python3 -m sounddevice` to test audio in container
-- Add visual debugging (e.g., print brightness or FFT bins)
-- Print connection and stream status in `main.py`
+Runs a Docker container using host's PulseAudio/D-Bus/Network.
 
+Container receives Bluetooth audio via host services.
+
+Audio outputs through the host's default PulseAudio sink (ideally the DAC HAT).
+
+Container Python script processes audio and streams LED data via UDP to WLED.
+
+## 🧪 Troubleshooting / Debugging
+Check Container Logs: docker logs PiAudio is your first step.
+
+Exec into Container: docker exec -it PiAudio bash
+
+Inside Container:
+
+Check PulseAudio connection: pactl info (should show host server details).
+
+List PulseAudio sources: pactl list sources short (look for Bluetooth source when connected).
+
+Test audio capture: python3 -m sounddevice (lists devices accessible via PortAudio/PulseAudio).
+
+Manually run the script: python3 /app/soundreact.py to see direct output/errors.
+
+Check Bluetooth status: bluetoothctl devices paired, bluetoothctl devices connected.
+
+Check Host: Re-verify steps in "Host System Checks", especially PulseAudio default sink (pactl info).
+
+WLED: Ensure WLED device is online, accessible from Pi (ping <your-wled-ip-or-hostname>), and UDP Realtime is enabled
