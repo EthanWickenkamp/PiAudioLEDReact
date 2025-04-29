@@ -34,7 +34,7 @@ Install Docker Compose plugin if not available:
 sudo apt-get install -y docker-compose-plugin
 ```
 
-### 3. Add `pi` to Docker group
+### 3. Add user `pi` to Docker group
 ```bash
 sudo usermod -aG docker pi
 sudo reboot
@@ -49,8 +49,49 @@ To update:
 ```bash
 git pull origin main
 ```
+## ✅ Host System Checks
 
-### 5. Start Docker Compose
+### PulseAudio
+```bash
+systemctl --user status pulseaudio.service
+pactl info
+pactl list sinks short
+pactl list sources short
+```
+fix
+```bash
+sudo apt install -y pulseaudio pulseaudio-utils
+systemctl --user enable pulseaudio
+systemctl --user start pulseaudio
+
+```
+
+
+### Bluetooth Daemon
+```bash
+systemctl status bluetooth
+bluetoothctl show
+```
+fix
+```bash
+sudo apt install -y bluez bluez-tools pulseaudio-module-bluetooth
+```
+
+### DBus
+```bash
+ps aux | grep dbus-daemon
+```
+
+### Audio Output Devices
+```bash
+aplay -l
+```
+
+---
+
+
+
+## Start Docker Compose, make start on boot
 ```bash
 docker compose up --build
 # or in detached mode:
@@ -66,33 +107,7 @@ docker logs PiAudio
 
 ---
 
-## ✅ Host System Checks
 
-### PulseAudio
-```bash
-systemctl --user status pulseaudio.service
-pactl info
-pactl list sinks short
-pactl list sources short
-```
-
-### Bluetooth Daemon
-```bash
-systemctl status bluetooth
-bluetoothctl show
-```
-
-### DBus
-```bash
-ps aux | grep dbus-daemon
-```
-
-### Audio Output Devices
-```bash
-aplay -l
-```
-
----
 
 ## 🔊 Audio Routing Overview
 
