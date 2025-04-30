@@ -14,7 +14,8 @@ services:
       - ./config/bluez-main.conf:/etc/bluetooth/main.conf:ro
       - /run/dbus:/run/dbus
       - /run/user/1000/pulse:/run/user/1000/pulse                   # <-- host PulseAudio socket
-      - /home/pi/.config/pulse/cookie:/home/audiouser/.config/pulse/cookie:ro  # <-- cookie auth
+      #- /home/pi/.config/pulse/cookie:/home/audiouser/.config/pulse/cookie:ro
+      - /home/pi/.config/pulse/cookie:/tmp/pulse-cookie:ro  # <-- cookie auth
 
     environment:
       PULSE_SERVER: unix:/run/user/1000/pulse/native
